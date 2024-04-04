@@ -18,6 +18,8 @@ This tool simplifies the process of subnetting, supernetting, merging, and divid
 Author: [Caroline Ek]
 Date: [March 31, 2024]
 """
+#Notes:
+#Try using socket for converting the IP addresses to binary.
 
 from abc import ABC, abstractmethod
 
@@ -33,14 +35,37 @@ class SubnetCalculationHandler(Handler):
     def handle_request(self, choice):
         if choice == '1':
             print("=======================")
-            print("\nHandling Subnet Calculation")
+            print("Handling Subnet Calculation")
             print("=======================")
             
-            ip = input("What is the IP address? ")
-            mask = input("What is the subnet mask? ")
-            
-            subnetCalculator(ip, mask)
-            
+            while True:
+                ip = input("What is the IP address? ")
+                splitIP = ip.split(".")
+                
+                if len(splitIP) == 4:  # Check if IP has exactly 4 parts
+                    valid = True
+                    for part in splitIP:
+                        if not 1 <= len(part) <= 3 or not 0 <= int(part) <=255:
+                            valid = False
+                            break
+                    if valid:
+                        break
+                print("Invalid IP. Each part must be 1 to 3 characters in length or range from 0-255. Try again.")
+                
+            while True:
+                method = input("Would you like to use (1) CIDR or (2) Classful Notation? \n")
+                
+                if method == '1':
+                    mask = input("What is the subnet mask? (No need to put in the slash.) \n/")
+                    subnetCIDR(ip, mask)
+                    break
+                elif method == '2':
+                    mask = input("What is the subnet mask? (Dotted decimal notation.)")
+                    subnetClassful(ip, mask)
+                    break
+                else:
+                    print("Invalid choice. Try again.")
+                
         elif self.successor:
             self.successor.handle_request(choice)
 
@@ -64,20 +89,34 @@ class MergingHandler(Handler):
 
 class DividingHandler(Handler):
     def handle_request(self, choice):
-        if choice == '4':
-            print("=======================")
-            print("\nHandling Dividing")
-            print("=======================")
-        elif self.successor:
-            self.successor.handle_request(choice)
+        while True:
+            if choice == '4':
+                print("=======================")
+                print("\nHandling Dividing")
+                print("=======================")
+                break
+            elif choice not in ['1', '2', '3', '4']:
+                print("Invalid choice. Try again.")
+                choice = input("Enter your choice (1-4): ")
+            elif self.successor:
+                self.successor.handle_request(choice)
+                break
             
 
-def subnetCalculator(ipAddr, subnetMask):
+def subnetCIDR(ipAddr, subnetMask):
     
+    binIP = IPtoBinary(ipAddr)
+    print(binIP, "is the IP address in binary. It has been successfully converted. \nNow I will perform the calculation.")
+
+def subnetClassful(ipAddr, subnetMask): #work on
+    return 0
     
-def ip_to_binary(ip):
-    return '.'.join([bin(int(x)+256)[3:] for x in ip_address.split('.')])
-    
+def IPtoBinary(ip):
+    return '.'.join([bin(int(x)+256)[3:] for x in ip.split('.')])
+
+def binaryToIP(binary):
+    octets = [binary[i:i+8] for i in range(0, len(binary), 8)]
+    return '.'.join([str(int(octet, 2)) for octet in octets])
 
 # Setting up the chain of responsibility
 subnet_handler = SubnetCalculationHandler()
@@ -85,15 +124,18 @@ supernet_handler = SupernettingHandler(subnet_handler)
 merging_handler = MergingHandler(supernet_handler)
 dividing_handler = DividingHandler(merging_handler)
 
-# Usage
-print("=========== Subnetting Tool ================")
-print("1. Subnet Calculation (Both dotted decimal and CIDR notation are available.)")
-print("2. Supernetting")
-print("3. Merging")
-print("4. Dividing\n")
-choice = input("What would you like to do? ")
+def mainMenu():
+    # Usage
+    print("=========== Subnetting Tool ================")
+    print("1. Subnet Calculation (Both dotted decimal and CIDR notation are available.)")
+    print("2. Supernetting")
+    print("3. Merging")
+    print("4. Dividing\n")
+    choice = input("What would you like to do? ")
 
-dividing_handler.handle_request(choice)
+    dividing_handler.handle_request(choice)
+    
+mainMenu()
 
 
 
