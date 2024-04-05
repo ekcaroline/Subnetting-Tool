@@ -108,12 +108,26 @@ class DividingHandler(Handler):
             
 
 def subnetCIDR(ipAddr, subnetMask):
-    
+    lengthIP = 32
     binIP = IPtoBinary(ipAddr)
-    print(binIP, "is the IP address in binary. It has been successfully converted. \nNow I will perform the calculation.")
+
+    print(binIP, "is the IP address in binary. It has been successfully converted. \n")
+    print("Calculating...")
+
+    #Calculate the network address 
     ipWithoutDecimal = binIP.replace(".", "")
-    networkAddr = ipWithoutDecimal[:int(subnetMask)]
-    hostAddr = ipWithoutDecimal[int(subnetMask):]
+    partNetAddr = ipWithoutDecimal[:int(subnetMask)]
+    bitsToZeroOutN = lengthIP - int(subnetMask)
+    fullNetAddr = partNetAddr + "0" * bitsToZeroOutN
+    networkAddr = binaryToIP(fullNetAddr)
+    print("Network Address:", networkAddr)
+
+    #Calculte the host address
+    partHostAddr = ipWithoutDecimal[int(subnetMask):]
+    bitsToZeroOutH = lengthIP - int(subnetMask)
+    fullHostAddr = "0" * bitsToZeroOutH + partHostAddr
+    hostAddr = binaryToIP(fullHostAddr)
+    print("Host Address:", hostAddr)
 
 def subnetClassful(ipAddr, subnetMask): #work on
     return 0
