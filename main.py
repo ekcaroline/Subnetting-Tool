@@ -38,11 +38,12 @@ class SubnetCalculationHandler(Handler):
             print("Handling Subnet Calculation")
             print("=======================")
             
+            # Ask for IP address and check if it is valid 
             while True:
                 ip = input("What is the IP address? ")
                 splitIP = ip.split(".")
                 
-                if len(splitIP) == 4:  # Check if IP has exactly 4 parts
+                if len(splitIP) == 4:  
                     valid = True
                     for part in splitIP:
                         if not 1 <= len(part) <= 3 or not 0 <= int(part) <=255:
@@ -51,8 +52,9 @@ class SubnetCalculationHandler(Handler):
                     if valid:
                         break
                 print("Invalid IP. Each part must be 1 to 3 characters in length or range from 0-255. Try again.")
-                
-            while True:
+            
+            # Notations and subnet mask
+            while True: 
                 method = input("Would you like to use (1) CIDR or (2) Classful Notation? \n")
                 
                 if method == '1':
@@ -61,6 +63,8 @@ class SubnetCalculationHandler(Handler):
                     break
                 elif method == '2':
                     mask = input("What is the subnet mask? (Dotted decimal notation.)")
+                    if not int(mask) == 0 or not int(mask) == 255:
+                        print("Invalid. Try again.")
                     subnetClassful(ip, mask)
                     break
                 else:
@@ -107,6 +111,9 @@ def subnetCIDR(ipAddr, subnetMask):
     
     binIP = IPtoBinary(ipAddr)
     print(binIP, "is the IP address in binary. It has been successfully converted. \nNow I will perform the calculation.")
+    ipWithoutDecimal = binIP.replace(".", "")
+    networkAddr = ipWithoutDecimal[:int(subnetMask)]
+    hostAddr = ipWithoutDecimal[int(subnetMask):]
 
 def subnetClassful(ipAddr, subnetMask): #work on
     return 0
