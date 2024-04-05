@@ -11,6 +11,7 @@ This project is a subnetting tool designed to facilitate the calculation of IP a
 - **Support for CIDR Notation:** Input IP addresses and subnet masks in CIDR notation (e.g., 192.168.1.0/24).
 - **Output Formatting:** Display results in a clear and concise format for easy interpretation.
 - **Interactive Command-Line Interface:** Utilize a user-friendly command-line interface for input and output.
+- **Others:** Utilize Chain of Responsibility design.
 
 ## Installation
 
