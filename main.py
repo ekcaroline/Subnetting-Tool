@@ -53,23 +53,42 @@ class SubnetCalculationHandler(Handler):
                         break
                 print("Invalid IP. Each part must be 1 to 3 characters in length or range from 0-255. Try again.")
             
-            # Notations and subnet mask
-            while True: 
-                method = input("Would you like to use (1) CIDR or (2) Classful Notation? \n")
+            # Notations and subnet mask !!FIX
+            method = input("Would you like to use (1) CIDR or (2) Classful Notation? ")
+            while True:
+                print("\n** Note **: \nIf using CIDR, please format using slash. '/XX'.")
+                print("If using Classful, please format in dotted decimal notation. Thank you!\n\n")
+                mask = input("What is the subnet mask? Need to convert subnet? Press 'U'. ")
                 
                 if method == '1':
-                    mask = input("What is the subnet mask? (No need to put in the slash.) \n/")
-                    subnetCIDR(ip, mask)
-                    break
+                    # Check if the first character is '/'
+                    if mask and mask[0] != '/':
+                        print("Invalid subnet mask format. Please enter the subnet mask in dotted decimal notation or CIDR notation.")
+                        print("========================================")
+                        continue
+                    
+                    cidrMask = mask[1:]
+                    if int(cidrMask) < 0 or int(cidrMask) > 32:
+                        print("Invalid subnet mask. Please enter a number between 0 and 32.")
+                    elif mask.lower() == 'u':
+                        convertSubnet()
+                    else:
+                        subnetCIDR(ip, cidrMask )
+                        break
                 elif method == '2':
-                    mask = input("What is the subnet mask? (Dotted decimal notation.)")
-                    if not int(mask) == 0 or not int(mask) == 255:
-                        print("Invalid. Try again.")
-                    subnetClassful(ip, mask)
-                    break
+                    classfulSubnet = ['255.0.0.0', '255.255.0.0', '255.255.255.0']
+                    if mask not in classfulSubnet:
+                        print("Invalid subnet mask. Please try again.")
+                        print("========================================")
+                    elif mask.lower() == 'u':
+                        convertSubnet()
+                    else:
+                        subnetClassful(ip, mask)
+                        break
                 else:
-                    print("Invalid choice. Try again.")
-                
+                    print("Invalid choice. Please enter either '1' or '2'.")
+
+
         elif self.successor:
             self.successor.handle_request(choice)
 
@@ -77,7 +96,7 @@ class SupernettingHandler(Handler):
     def handle_request(self, choice):
         if choice == '2':
             print("=======================")
-            print("\nHandling Supernetting")
+            print("Handling Supernetting")
             print("=======================")
         elif self.successor:
             self.successor.handle_request(choice)
@@ -86,25 +105,42 @@ class MergingHandler(Handler):
     def handle_request(self, choice):
         if choice == '3':
             print("=======================")
-            print("\nHandling Merging")
+            print("Handling Merging")
             print("=======================")
         elif self.successor:
             self.successor.handle_request(choice)
 
 class DividingHandler(Handler):
     def handle_request(self, choice):
+        if choice == '4':
+            print("=======================")
+            print("Handling Dividing")
+            print("=======================")
+        elif self.successor:
+            self.successor.handle_request(choice)
+
+            
+class OtherHandler(Handler): #work on
+    def handle_request(self, choice):
         while True:
-            if choice == '4':
+            if choice == '5':
                 print("=======================")
-                print("\nHandling Dividing")
+                print("Handling Other")
                 print("=======================")
+                
+                print("\nOther options:")
+                print("1. Convert subnet mask to '/'")
+                print("2. Convert IP address")
+                print("3. Convert wildcard mask")
+                otherChoice = input("\nWhat would you like to do? ")
                 break
-            elif choice not in ['1', '2', '3', '4']:
+            elif choice not in ['1', '2', '3', '4', '5']:
                 print("Invalid choice. Try again.")
-                choice = input("Enter your choice (1-4): ")
+                choice = input("Enter your choice (1-5): ")
             elif self.successor:
                 self.successor.handle_request(choice)
                 break
+        
             
 
 def subnetCIDR(ipAddr, subnetMask):
@@ -122,7 +158,7 @@ def subnetCIDR(ipAddr, subnetMask):
     networkAddr = binaryToIP(fullNetAddr)
     print("Network Address:", networkAddr)
 
-    #Calculte the host address
+    #Calculte the host address 
     partHostAddr = ipWithoutDecimal[int(subnetMask):]
     bitsToZeroOutH = lengthIP - int(subnetMask)
     fullHostAddr = "0" * bitsToZeroOutH + partHostAddr
@@ -130,6 +166,10 @@ def subnetCIDR(ipAddr, subnetMask):
     print("Host Address:", hostAddr)
 
 def subnetClassful(ipAddr, subnetMask): #work on
+    classA = range(1, 126)
+    classB = range(128, 191)
+    classC = range(192, 223)
+
     return 0
     
 def IPtoBinary(ip):
@@ -139,11 +179,19 @@ def binaryToIP(binary):
     octets = [binary[i:i+8] for i in range(0, len(binary), 8)]
     return '.'.join([str(int(octet, 2)) for octet in octets])
 
+def convertSubnet(): #work on
+    typeChoice = input("Is the subnet mask in (1) Dotted decimal or (2) '/' ? ")
+    if int(typeChoice) == 1:
+        return
+    elif int(typeChoice) == 2:
+        return
+
 # Setting up the chain of responsibility
 subnet_handler = SubnetCalculationHandler()
 supernet_handler = SupernettingHandler(subnet_handler)
 merging_handler = MergingHandler(supernet_handler)
 dividing_handler = DividingHandler(merging_handler)
+other_handler = OtherHandler(dividing_handler)
 
 def mainMenu():
     # Usage
@@ -151,12 +199,17 @@ def mainMenu():
     print("1. Subnet Calculation (Both dotted decimal and CIDR notation are available.)")
     print("2. Supernetting")
     print("3. Merging")
-    print("4. Dividing\n")
+    print("4. Dividing")
+    print("5. Other\n")
     choice = input("What would you like to do? ")
 
-    dividing_handler.handle_request(choice)
+    other_handler.handle_request(choice)
     
 mainMenu()
+
+
+
+
 
 
 
